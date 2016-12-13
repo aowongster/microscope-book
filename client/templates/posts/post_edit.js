@@ -11,11 +11,11 @@ Template.postEdit.events({
         // call server side meteor method to do insert
         Meteor.call('postEdit', postProperties, function(error, result) { // display the error to the user and abort
             if (error)
-                return alert(error.reason);
+                return throwError(error.reason);
 
             // catch special case and alert user
             if (result.postExists)
-                alert('This link has already been posted');
+                throwError('This link has already been posted');
 
             Router.go('postPage', {_id: result._id});
         });
