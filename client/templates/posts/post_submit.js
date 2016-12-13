@@ -1,21 +1,41 @@
 Template.postSubmit.events({
-    'submit form': function(e) {
-        e.preventDefault();
-        var post = {
-            url: $(e.target).find('[name=url]').val(),
-            title: $(e.target).find('[name=title]').val()
-        };
+  'submit form': function(e) {
+    e.preventDefault();
+    var post = {
+      url: $(e.target).find('[name=url]').val(),
+      title: $(e.target).find('[name=title]').val()
+    };
 
-        // call server side meteor method to do insert
-        Meteor.call('postInsert', post, function(error, result) { // display the error to the user and abort
-            if (error)
-                return throwError(error.reason);
+    // call server side meteor method to do insert
+    var errors = validatePost(post);
+    if (errors.title || errors.url)
+      return Session.set('postSubmitErrors', errors);
+      
+    Meteor.call('postInsert', post, function(error, result) { // display the error to the user and abort
+      if (error)
+        return throwError(error.reason);
 
-            // catch special case and alert user
-            if (result.postExists)
-                throwError('This link has already been posted');
+      // catch special case and alert user
+      if (result.postExists)
+        throwError('This link has already been posted');
 
-            Router.go('postPage', {_id: result._id});
-        });
-    }
+      Router.go('postPage', {_id: result._id});
+    });
+  }
+});
+
+// create session to store errors
+Template.postSubmit.onCreated(function() {
+  Session.set('postSubmitErrors', {});
+});
+
+Template.postSubmit.helpers({
+  errorMessage: function(field) {
+    return Session.get('postSubmitErrors')[field];
+  },
+  errorClass: function(field) {
+    return !!Session.get('postSubmitErrors')[field]
+      ? 'has-error'
+      : '';
+  }
 });
