@@ -34,7 +34,7 @@ if (Posts.find().count() === 0) {
   Meteor.publish('comments', function() {
     return Comments.find();
   });
-  server / publications.js
+
   Comments.insert({
     postId: telescopeId,
     userId: sacha._id,
